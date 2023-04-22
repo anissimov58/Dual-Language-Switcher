@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace LanguageSwitcher.Helpers;
+namespace LDS.Helpers;
 
 public static class RegistryHelper
 {
@@ -56,6 +56,33 @@ public static class RegistryHelper
         using (RegistryKey key = Registry.CurrentUser.CreateSubKey(keyPath))
         {
             key.SetValue(valueName, value, RegistryValueKind.String);
+        }
+    }
+
+    public static void Set_EnableOnStartUp() {
+        // Add a registry key to the Windows registry to make the application start automatically on Windows startup
+        RegistryKey? registryKey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
+        if (registryKey != null)
+        {
+            registryKey.SetValue("DLS", Application.ExecutablePath);
+        }
+        else {
+            MessageBox.Show("Error enabling automatic startup for this application. Sorry(");
+        }
+    }
+
+
+    public static void Set_DisableOnStartUp()
+    {
+        // Add a registry key to the Windows registry to make the application start automatically on Windows startup
+        RegistryKey? registryKey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
+        if (registryKey != null)
+        {
+            registryKey.DeleteValue("DLS", false);
+        }
+        else
+        {
+            MessageBox.Show("Error disabling automatic startup for this application. Sorry(");
         }
     }
 

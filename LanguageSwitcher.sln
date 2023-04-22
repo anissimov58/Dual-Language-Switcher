@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.33516.290
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LanguageSwitcher", "LanguageSwitcher\LanguageSwitcher.csproj", "{CC02D03A-6908-465A-ACA3-0599327E4DE7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DLS", "LanguageSwitcher\DLS.csproj", "{CC02D03A-6908-465A-ACA3-0599327E4DE7}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KeyboardHook", "KeyBoardHook\KeyboardHook\KeyboardHook.csproj", "{74CA6413-B725-4CD4-9C87-FE21A81B0101}"
 EndProject

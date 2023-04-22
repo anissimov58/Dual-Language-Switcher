@@ -1,4 +1,4 @@
-﻿namespace LanguageSwitcher
+﻿namespace LDS
 {
     partial class MainForm
     {
@@ -31,6 +31,9 @@
             components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             notifyIcon1 = new NotifyIcon(components);
+            contextMenuStrip1 = new ContextMenuStrip(components);
+            openToolStripMenuItem = new ToolStripMenuItem();
+            exitToolStripMenuItem = new ToolStripMenuItem();
             Language1Selector = new ComboBox();
             Language2Selector = new ComboBox();
             radioButtonCtrlShift = new RadioButton();
@@ -38,11 +41,8 @@
             buttonStartStop = new Button();
             panel1 = new Panel();
             checkBoxEnableStartup = new CheckBox();
-            contextMenuStrip1 = new ContextMenuStrip(components);
-            openToolStripMenuItem = new ToolStripMenuItem();
-            exitToolStripMenuItem = new ToolStripMenuItem();
-            panel1.SuspendLayout();
             contextMenuStrip1.SuspendLayout();
+            panel1.SuspendLayout();
             SuspendLayout();
             // 
             // notifyIcon1
@@ -52,7 +52,26 @@
             notifyIcon1.Icon = (Icon)resources.GetObject("notifyIcon1.Icon");
             notifyIcon1.Text = "Dual Language Switcher";
             notifyIcon1.Visible = true;
-            notifyIcon1.MouseDoubleClick += notifyIcon1_MouseDoubleClick;
+            // 
+            // contextMenuStrip1
+            // 
+            contextMenuStrip1.Items.AddRange(new ToolStripItem[] { openToolStripMenuItem, exitToolStripMenuItem });
+            contextMenuStrip1.Name = "contextMenuStrip1";
+            contextMenuStrip1.Size = new Size(104, 48);
+            // 
+            // openToolStripMenuItem
+            // 
+            openToolStripMenuItem.Name = "openToolStripMenuItem";
+            openToolStripMenuItem.Size = new Size(103, 22);
+            openToolStripMenuItem.Text = "Open";
+            openToolStripMenuItem.Click += openToolStripMenuItem_Click;
+            // 
+            // exitToolStripMenuItem
+            // 
+            exitToolStripMenuItem.Name = "exitToolStripMenuItem";
+            exitToolStripMenuItem.Size = new Size(103, 22);
+            exitToolStripMenuItem.Text = "Exit";
+            exitToolStripMenuItem.Click += exitToolStripMenuItem_Click;
             // 
             // Language1Selector
             // 
@@ -127,26 +146,7 @@
             checkBoxEnableStartup.TabIndex = 9;
             checkBoxEnableStartup.Text = "Enable at PC Startup ";
             checkBoxEnableStartup.UseVisualStyleBackColor = true;
-            // 
-            // contextMenuStrip1
-            // 
-            contextMenuStrip1.Items.AddRange(new ToolStripItem[] { openToolStripMenuItem, exitToolStripMenuItem });
-            contextMenuStrip1.Name = "contextMenuStrip1";
-            contextMenuStrip1.Size = new Size(104, 48);
-            // 
-            // openToolStripMenuItem
-            // 
-            openToolStripMenuItem.Name = "openToolStripMenuItem";
-            openToolStripMenuItem.Size = new Size(103, 22);
-            openToolStripMenuItem.Text = "Open";
-            openToolStripMenuItem.Click += openToolStripMenuItem_Click;
-            // 
-            // exitToolStripMenuItem
-            // 
-            exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            exitToolStripMenuItem.Size = new Size(103, 22);
-            exitToolStripMenuItem.Text = "Exit";
-            exitToolStripMenuItem.Click += exitToolStripMenuItem_Click;
+            checkBoxEnableStartup.CheckedChanged += checkBoxEnableStartup_CheckedChanged;
             // 
             // MainForm
             // 
@@ -170,9 +170,10 @@
             SizeGripStyle = SizeGripStyle.Hide;
             Text = "DLS - Dual Language Switcher";
             FormClosing += MainForm_FormClosing;
+            Load += MainForm_Load;
+            contextMenuStrip1.ResumeLayout(false);
             panel1.ResumeLayout(false);
             panel1.PerformLayout();
-            contextMenuStrip1.ResumeLayout(false);
             ResumeLayout(false);
             PerformLayout();
         }

@@ -8,16 +8,16 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace LanguageSwitcher.Settings {
+namespace DLS.Settings {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.5.0.0")]
-    internal sealed partial class MySettings : global::System.Configuration.ApplicationSettingsBase {
+    internal sealed partial class DLSSettings : global::System.Configuration.ApplicationSettingsBase {
         
-        private static MySettings defaultInstance = ((MySettings)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new MySettings())));
+        private static DLSSettings defaultInstance = ((DLSSettings)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new DLSSettings())));
         
-        public static MySettings Default {
+        public static DLSSettings Default {
             get {
                 return defaultInstance;
             }
@@ -56,6 +56,18 @@ namespace LanguageSwitcher.Settings {
             }
             set {
                 this["LanguageIndex2"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool IsStartupEnabled {
+            get {
+                return ((bool)(this["IsStartupEnabled"]));
+            }
+            set {
+                this["IsStartupEnabled"] = value;
             }
         }
     }

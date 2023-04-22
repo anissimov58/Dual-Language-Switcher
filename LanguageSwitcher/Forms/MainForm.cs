@@ -1,15 +1,11 @@
 using System.Runtime.InteropServices;
 using System.Text;
 using KeyBoardHook;
-using LanguageSwitcher.Helpers;
-using LanguageSwitcher.Data;
-using LanguageSwitcher.Settings;
-using System.Runtime.CompilerServices;
-using Microsoft.VisualBasic.Devices;
-using System.Diagnostics;
-using System.Windows.Forms;
+using LDS.Helpers;
+using LDS.Data;
+using DLS.Settings;
 
-namespace LanguageSwitcher
+namespace LDS
 {
     public partial class MainForm : Form
     {
@@ -60,18 +56,28 @@ namespace LanguageSwitcher
 
             //Select correct layout switching method based on current user settings
             InitSwitchingMethodSelectors();
+
+
+            InitEnablingOnStartup();
+        }
+
+        private void InitEnablingOnStartup()
+        {
+            bool isStartupEnabled = DLSSettings.Default.IsStartupEnabled;
+
+            checkBoxEnableStartup.Checked = isStartupEnabled;
         }
 
         private void InitSwitchingMethodSelectors()
         {
             //int ToggleValue;
-            if (Settings.MySettings.Default.Language_Toggle == -1 || MySettings.Default.Language_Toggle > 3)
+            if (DLSSettings.Default.Language_Toggle < 1 || DLSSettings.Default.Language_Toggle > 3)
             {
                 ToggleValue = RegistryHelper.Get_Language_Toggle_Value();
             }
             else
             {
-                ToggleValue = MySettings.Default.Language_Toggle;
+                ToggleValue = DLSSettings.Default.Language_Toggle;
             }
 
             switch (ToggleValue)
@@ -112,7 +118,7 @@ namespace LanguageSwitcher
             }
 
             //Then, lets check Settings and get previously selected languages
-            if (MySettings.Default.LanguageIndex1 == -1 && MySettings.Default.LanguageIndex2 == -1)
+            if (DLSSettings.Default.LanguageIndex1 == -1 && DLSSettings.Default.LanguageIndex2 == -1)
             {
                 //this means that we have not setup app just yet.
                 //Select first and second languages.
@@ -128,18 +134,18 @@ namespace LanguageSwitcher
 
                 //bounds checking and assigning values
                 //Second goes first, so that after checking - they will be in accending order
-                if (MySettings.Default.LanguageIndex2 > 0 && MySettings.Default.LanguageIndex2 < inputLanguages.Count)
+                if (DLSSettings.Default.LanguageIndex2 > 0 && DLSSettings.Default.LanguageIndex2 < inputLanguages.Count)
                 {
-                    Language2Selector.SelectedIndex = MySettings.Default.LanguageIndex2;
+                    Language2Selector.SelectedIndex = DLSSettings.Default.LanguageIndex2;
                 }
                 else
                 {
                     Language2Selector.SelectedIndex = 1;
                 }
 
-                if (MySettings.Default.LanguageIndex1 > 0 && MySettings.Default.LanguageIndex1 < inputLanguages.Count)
+                if (DLSSettings.Default.LanguageIndex1 > 0 && DLSSettings.Default.LanguageIndex1 < inputLanguages.Count)
                 {
-                    Language1Selector.SelectedIndex = MySettings.Default.LanguageIndex1;
+                    Language1Selector.SelectedIndex = DLSSettings.Default.LanguageIndex1;
                 }
                 else
                 {
@@ -192,12 +198,12 @@ namespace LanguageSwitcher
         private void UpdateAndSaveSettings()
         {
             //saving settings so that we can reapply them later
-            MySettings.Default.LanguageIndex1 = Language1Selector.SelectedIndex;
-            MySettings.Default.LanguageIndex2 = Language2Selector.SelectedIndex;
-            MySettings.Default.Language_Toggle = ToggleValue;
-
+            DLSSettings.Default.LanguageIndex1 = Language1Selector.SelectedIndex;
+            DLSSettings.Default.LanguageIndex2 = Language2Selector.SelectedIndex;
+            DLSSettings.Default.Language_Toggle = ToggleValue;
+            DLSSettings.Default.IsStartupEnabled = checkBoxEnableStartup.Checked;
             //Saving Settings
-            MySettings.Default.Save();
+            DLSSettings.Default.Save();
         }
 
         private void RemoveKeyboardHook()
@@ -351,7 +357,6 @@ namespace LanguageSwitcher
 
         }
 
-
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             if (e.CloseReason == CloseReason.UserClosing)
@@ -365,14 +370,16 @@ namespace LanguageSwitcher
         {
             // Show the main form when the user double-clicks the system tray icon
             this.Visible = true;
-            this.WindowState = FormWindowState.Normal;
+            this.Show();
+            this.Focus();
+            //this.WindowState = FormWindowState.Normal;
         }
 
 
         private void CloseApplication()
         {
             RemoveKeyboardHook();
-            
+
             Application.Exit();
         }
 
@@ -386,7 +393,28 @@ namespace LanguageSwitcher
             // Show the main form when the user double-clicks the system tray icon
             this.Visible = true;
             this.Show();
-            this.WindowState = FormWindowState.Normal;
+            this.Focus();
+            //this.WindowState = FormWindowState.Normal;
+        }
+
+        private void checkBoxEnableStartup_CheckedChanged(object sender, EventArgs e)
+        {
+            if (checkBoxEnableStartup.Checked)
+            {
+                RegistryHelper.Set_EnableOnStartUp();
+            }
+            else
+            {
+                RegistryHelper.Set_DisableOnStartUp();
+            }
+        }
+
+        private void MainForm_Load(object sender, EventArgs e)
+        {
+            Screen screen = Screen.PrimaryScreen;
+            int x = screen.WorkingArea.Width - this.Width - 0;
+            int y = screen.WorkingArea.Height - this.Height - 0;
+            this.Location = new Point(x, y);
         }
     }
 }

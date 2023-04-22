@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace LanguageSwitcher.Data;
+namespace LDS.Data;
 
 internal static class MyConstants
 {

@@ -1,4 +1,4 @@
-namespace LanguageSwitcher
+namespace LDS
 {
     internal static class Program
     {
