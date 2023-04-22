@@ -6,7 +6,14 @@
     <Nullable>enable</Nullable>
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
+    <StartupObject>LDS.Program</StartupObject>
+    <ApplicationIcon>DALL·E 2023-04-22 21.01.36 - A Refresh icon from the 90s in the style of minimalism. Black outline.ico</ApplicationIcon>
+    <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="DALL·E 2023-04-22 21.01.36 - A Refresh icon from the 90s in the style of minimalism. Black outline.ico" />
+  </ItemGroup>
 
   <ItemGroup>
     <Folder Include="Classes\" />

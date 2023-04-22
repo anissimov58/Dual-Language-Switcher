@@ -25,7 +25,6 @@ namespace LDS
         [DllImport("user32.dll")]
         private static extern IntPtr LoadKeyboardLayout(string pwszKLID, uint Flags);
 
-
         //keys that are beeing listend to
         private static List<KeyboardHook.VKeys> activeKeys = new List<KeyboardHook.VKeys>();    //keys that are beeing listend to
         private static List<KeyboardHook.VKeys> pressedKeys = new List<KeyboardHook.VKeys>();   //keys that has been pressed, but not released
@@ -45,8 +44,12 @@ namespace LDS
             //Init GUI elements
             InitGUI();
 
+            StartService();
+        }
 
-
+        private void StartService()
+        {
+            buttonStartStop_Click(this, new EventArgs());
         }
 
         private void InitGUI()
@@ -56,7 +59,6 @@ namespace LDS
 
             //Select correct layout switching method based on current user settings
             InitSwitchingMethodSelectors();
-
 
             InitEnablingOnStartup();
         }
@@ -365,16 +367,6 @@ namespace LDS
                 this.Hide();      // Hide the form instead of closing it
             }
         }
-
-        private void notifyIcon1_MouseDoubleClick(object sender, MouseEventArgs e)
-        {
-            // Show the main form when the user double-clicks the system tray icon
-            this.Visible = true;
-            this.Show();
-            this.Focus();
-            //this.WindowState = FormWindowState.Normal;
-        }
-
 
         private void CloseApplication()
         {
