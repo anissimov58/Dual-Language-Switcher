@@ -25,7 +25,7 @@ namespace LanguageSwitcher.Settings {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        [global::System.Configuration.DefaultSettingValueAttribute("-1")]
         public int Language_Toggle {
             get {
                 return ((int)(this["Language_Toggle"]));
@@ -37,7 +37,7 @@ namespace LanguageSwitcher.Settings {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        [global::System.Configuration.DefaultSettingValueAttribute("-1")]
         public int LanguageIndex1 {
             get {
                 return ((int)(this["LanguageIndex1"]));
@@ -49,7 +49,7 @@ namespace LanguageSwitcher.Settings {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        [global::System.Configuration.DefaultSettingValueAttribute("-1")]
         public int LanguageIndex2 {
             get {
                 return ((int)(this["LanguageIndex2"]));

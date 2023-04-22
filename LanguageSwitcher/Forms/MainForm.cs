@@ -1,12 +1,13 @@
 using System.Runtime.InteropServices;
-using System.Security.Cryptography.X509Certificates;
 using System.Text;
-using System.Xml.Serialization;
 using KeyBoardHook;
 using LanguageSwitcher.Helpers;
 using LanguageSwitcher.Data;
-using System.Runtime.ExceptionServices;
 using LanguageSwitcher.Settings;
+using System.Runtime.CompilerServices;
+using Microsoft.VisualBasic.Devices;
+using System.Diagnostics;
+using System.Windows.Forms;
 
 namespace LanguageSwitcher
 {
@@ -35,58 +36,70 @@ namespace LanguageSwitcher
 
         private static List<InputLanguage> inputLanguages = new List<InputLanguage>();          //list of all the input Languages on this current machine
 
-        private static int Registry_Language_Toggle_Value_OnStartup;
-        private static KeyboardHook? keyboardHook;
+        private static int ToggleValue;             //value of Registry Key "HKEY_CURRENT_USER\Keyboard Layout\Toggle\Language Hotkey"
 
+        private static KeyboardHook keyboardHook = new KeyboardHook();  //Keyboard Hook
+
+        private static bool IsRunning = false;      //If we capturing keyboard presses - true, else false;
 
         public MainForm()
         {
-
-
-
             InitializeComponent();
 
-
-            //read user values and save them
-            Init();
-
-
-        }
-
-        private void Init()
-        {
-            //Setup proccess
-
-            //Save current user settings
-            SaveLanguageToggleSetting();
-            //Get all enabled languages and place them into inputLanguages
-            GetEnabledLanguages();
-
+            //Init GUI elements
             InitGUI();
 
-            ////Init Hook
-            //InitKeyboardHook();
 
-            //switch (Registry_Language_Toggle_Value_OnStartup)
-            //{
-            //    case (int)MyConstants.LANGTOGGLE_VALUES.CTRL_SHIFT:
-            //        SetUpToggleForCtrlShift();
-            //        break;
 
-            //    case (int)MyConstants.LANGTOGGLE_VALUES.ALT_SHIFT:
-            //        SetUpToggleForAltShift();
-            //        break;
-            //    default: //if NONE or any other value
-            //        //then set it to ALT+SHIFT because 99.9% uses ALT+Shift
-            //        SetUpToggleForAltShift();
-            //        break;
-            //}
         }
 
         private void InitGUI()
         {
             //Populate language selectors
+            InitLanguageSelectors();
 
+            //Select correct layout switching method based on current user settings
+            InitSwitchingMethodSelectors();
+        }
+
+        private void InitSwitchingMethodSelectors()
+        {
+            //int ToggleValue;
+            if (Settings.MySettings.Default.Language_Toggle == -1 || MySettings.Default.Language_Toggle > 3)
+            {
+                ToggleValue = RegistryHelper.Get_Language_Toggle_Value();
+            }
+            else
+            {
+                ToggleValue = MySettings.Default.Language_Toggle;
+            }
+
+            switch (ToggleValue)
+            {
+                case (int)MyConstants.LANGTOGGLE_VALUES.ALT_SHIFT:
+                    radioButtonAltShift.Checked = true;
+                    break;
+
+                case (int)MyConstants.LANGTOGGLE_VALUES.CTRL_SHIFT:
+                    radioButtonAltShift.Checked = false;
+                    break;
+
+                default:
+                    radioButtonAltShift.Checked = true;
+                    break;
+            }
+            radioButtonCtrlShift.Checked = !radioButtonAltShift.Checked;
+        }
+
+        private void InitLanguageSelectors()
+        {
+            //Get Enabled Languages;
+            foreach (InputLanguage lang in InputLanguage.InstalledInputLanguages)
+            {
+                inputLanguages.Add(lang);
+            }
+
+            //check for out of bounds
             if (inputLanguages.Count < 2)
             {
                 MessageBox.Show("Error, app won't work, if there is only 1 layout enabled. Please enable additional layouts and try again. Thank you. Closing the app now.");
@@ -98,51 +111,107 @@ namespace LanguageSwitcher
                 Language2Selector.Items.Add(language.LayoutName);
             }
 
-            //Then, lets check Settings.
-            if (MySettings.Default.LanguageIndex1 == 0 && MySettings.Default.LanguageIndex2 == 0)
+            //Then, lets check Settings and get previously selected languages
+            if (MySettings.Default.LanguageIndex1 == -1 && MySettings.Default.LanguageIndex2 == -1)
             {
                 //this means that we have not setup app just yet.
-
                 //Select first and second languages.
-
                 Language1Selector.SelectedIndex = 0;
                 Language2Selector.SelectedIndex = 1;
             }
-
-
-
-        }
-
-        private void GetEnabledLanguages()
-        {
-            foreach (InputLanguage lang in InputLanguage.InstalledInputLanguages)
+            else
             {
-                inputLanguages.Add(lang);
+                //App has been ran before, simply apply settings and hide window.
+                //  Hide the form from the taskbar
+                this.Visible = false;
+
+
+                //bounds checking and assigning values
+                //Second goes first, so that after checking - they will be in accending order
+                if (MySettings.Default.LanguageIndex2 > 0 && MySettings.Default.LanguageIndex2 < inputLanguages.Count)
+                {
+                    Language2Selector.SelectedIndex = MySettings.Default.LanguageIndex2;
+                }
+                else
+                {
+                    Language2Selector.SelectedIndex = 1;
+                }
+
+                if (MySettings.Default.LanguageIndex1 > 0 && MySettings.Default.LanguageIndex1 < inputLanguages.Count)
+                {
+                    Language1Selector.SelectedIndex = MySettings.Default.LanguageIndex1;
+                }
+                else
+                {
+                    Language1Selector.SelectedIndex = 0;
+                }
             }
         }
 
-        private static void InitKeyboardHook()
+        private void InitKeyboardHook()
         {
+
+            if (IsRunning)
+                return; //if for some reason this happened - there is a bug and we heed to fix it, but just to be safe, we disable adding new hooks on top of existing ones 
+
             //create hook
             keyboardHook = new KeyboardHook();
 
             //Wiring up what to do
             keyboardHook.KeyDown += new KeyboardHook.KeyboardHookCallback(KeyboardHook_KeyDown);
             keyboardHook.KeyUp += new KeyboardHook.KeyboardHookCallback(KeyboardHook_KeyUp);
+
+            //Populate activeKeys based of toggleValue
+            switch (ToggleValue)
+            {
+                case (int)MyConstants.LANGTOGGLE_VALUES.CTRL_SHIFT:
+                    SetUpToggleForCtrlShift();
+                    break;
+
+                case (int)MyConstants.LANGTOGGLE_VALUES.ALT_SHIFT:
+                    SetUpToggleForAltShift();
+                    break;
+                default: //if NONE or any other value
+                    //then set it to ALT+SHIFT because 95% users use Alt+Shift
+                    SetUpToggleForAltShift();
+                    break;
+            }
+
+            //Installing the Keyboard Hooks
+            keyboardHook.Install();
+
+            IsRunning = true;
+
+            // disable built-in Keyboard toggle switcher to avoid interference and double-switching
+            RegistryHelper.Set_Language_Toggle_Value((int)MyConstants.LANGTOGGLE_VALUES.NONE);
+
+            UpdateAndSaveSettings();
+
         }
 
-        private void SaveLanguageToggleSetting()
+        private void UpdateAndSaveSettings()
         {
-            //read Language Toggle value from registry
-            Registry_Language_Toggle_Value_OnStartup = RegistryHelper.Get_Language_Toggle_Value();
-            Console.WriteLine("[" + DateTime.Now.ToLongTimeString() + "] Reading Lang Toggle is " + Registry_Language_Toggle_Value_OnStartup + " which is :" + Enum.GetName(typeof(MyConstants.LANGTOGGLE_VALUES), Registry_Language_Toggle_Value_OnStartup));
+            //saving settings so that we can reapply them later
+            MySettings.Default.LanguageIndex1 = Language1Selector.SelectedIndex;
+            MySettings.Default.LanguageIndex2 = Language2Selector.SelectedIndex;
+            MySettings.Default.Language_Toggle = ToggleValue;
+
+            //Saving Settings
+            MySettings.Default.Save();
+        }
+
+        private void RemoveKeyboardHook()
+        {
+            //We heed to restore build-in keyboard toggle
+            RegistryHelper.Set_Language_Toggle_Value(ToggleValue);
+
+            //now lets uninstall our hook
+            keyboardHook.Uninstall();
+            //Done
         }
 
         private static void SetUpToggleForAltShift()
         {
-            //disable Build-in toggles
-            RegistryHelper.Set_Language_Toggle_Value((int)MyConstants.LANGTOGGLE_VALUES.NONE);
-
             //clearing list (just in case)
             activeKeys.Clear();
 
@@ -158,9 +227,6 @@ namespace LanguageSwitcher
 
         private static void SetUpToggleForCtrlShift()
         {
-            //disable Build-in toggles
-            RegistryHelper.Set_Language_Toggle_Value((int)MyConstants.LANGTOGGLE_VALUES.NONE);
-
             //clearing list (just in case)
             activeKeys.Clear();
 
@@ -179,12 +245,8 @@ namespace LanguageSwitcher
             pressedKeys.Remove(key);
         }
 
-        private static void KeyboardHook_KeyDown(KeyBoardHook.KeyboardHook.VKeys key)
+        private static void KeyboardHook_KeyDown(KeyboardHook.VKeys key)
         {
-            //if activeKey and is not pressed yet
-
-
-
             if (activeKeys.Contains(key) && !pressedKeys.Contains(key))
             {
                 pressedKeys.Add(key);
@@ -196,7 +258,7 @@ namespace LanguageSwitcher
 
                     IntPtr hkl = GetKeyboardLayout(0x00000000);
 
-                    Console.WriteLine("[" + DateTime.Now.ToLongTimeString() + "]Prepearing to change layout. Current handle is:" + hkl);
+                    //Console.WriteLine("[" + DateTime.Now.ToLongTimeString() + "]Prepearing to change layout. Current handle is:" + hkl);
                     //0x04190419 Русская
                     //0x04090409 English
                     //0xf03d040d Hebrew
@@ -215,7 +277,7 @@ namespace LanguageSwitcher
                     if (result == IntPtr.Zero)
                     {
                         int error = Marshal.GetLastWin32Error();
-                        Console.WriteLine("we have an error in LoadKeyboardLayout. error code:" + error);
+                        MessageBox.Show("We have an error in LoadKeyboardLayout. error code:" + error);
                         return;
                     }
 
@@ -223,7 +285,7 @@ namespace LanguageSwitcher
                     if (result == IntPtr.Zero)
                     {
                         int error = Marshal.GetLastWin32Error();
-                        Console.WriteLine("we have an error in ActivateKeyboardLayout. error code:" + error);
+                        MessageBox.Show("We have an error in ActivateKeyboardLayout. error code:" + error);
                         return;
                     }
 
@@ -231,34 +293,64 @@ namespace LanguageSwitcher
                     if (result == IntPtr.Zero)
                     {
                         int error = Marshal.GetLastWin32Error();
-                        Console.WriteLine("we have an error in WM_INPUTLANGCHANGEREQUEST. error code:" + error);
+                        MessageBox.Show("We have an error in WM_INPUTLANGCHANGEREQUEST. error code:" + error);
                         return;
                     }
 
-                    Console.WriteLine("Layout changed ! ==========================================================");
+                    //Console.WriteLine("Layout changed ! ==========================================================");
 
                     return;
                 }
             }
         }
-        //keyboardHook.Uninstall();
-        //    RegistryHelper.Set_Language_Toggle_Value(Registry_Language_Toggle_Value_OnStartup);
-        //    Console.WriteLine("[" + DateTime.Now.ToLongTimeString() + "] Lang Toggle Restored to " + Registry_Language_Toggle_Value_OnStartup);
 
-        private void Form1_Load(object sender, EventArgs e)
+        private void Language1Selector_SelectedIndexChanged(object sender, EventArgs e)
         {
+            if (Language1Selector.SelectedIndex == Language2Selector.SelectedIndex)
+            {
+                if (Language2Selector.SelectedIndex == Language2Selector.Items.Count - 1)
+                {
+                    Language2Selector.SelectedIndex = 0;
+                }
+                else
+                {
+                    Language2Selector.SelectedIndex = Language2Selector.SelectedIndex + 1;
+                }
+            }
+        }
+
+        private void Language2Selector_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (Language1Selector.SelectedIndex == Language2Selector.SelectedIndex)
+            {
+                if (Language1Selector.SelectedIndex == Language1Selector.Items.Count - 1)
+                {
+                    Language1Selector.SelectedIndex = 0;
+                }
+                else
+                {
+                    Language1Selector.SelectedIndex = Language1Selector.SelectedIndex + 1;
+                }
+            }
+        }
+
+        private void buttonStartStop_Click(object sender, EventArgs e)
+        {
+            if (!IsRunning)
+            {
+                InitKeyboardHook();
+                buttonStartStop.Text = "Enabled. Running.";
+                IsRunning = true;
+            }
+            else
+            {
+                RemoveKeyboardHook();
+                buttonStartStop.Text = "Stopped. Press to start.";
+                IsRunning = false;
+            }
 
         }
 
-        private void radioButton1_CheckedChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private void comboBox2_SelectedIndexChanged(object sender, EventArgs e)
-        {
-
-        }
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
@@ -271,22 +363,30 @@ namespace LanguageSwitcher
 
         private void notifyIcon1_MouseDoubleClick(object sender, MouseEventArgs e)
         {
-            this.Show();
+            // Show the main form when the user double-clicks the system tray icon
+            this.Visible = true;
+            this.WindowState = FormWindowState.Normal;
         }
 
-        private void Language1Selector_SelectedIndexChanged(object sender, EventArgs e)
+
+        private void CloseApplication()
         {
-            Language2Selector.Items.Clear();
+            RemoveKeyboardHook();
+            
+            Application.Exit();
+        }
 
-            int selectedIndexInOther = Language1Selector.SelectedIndex;
+        private void exitToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            CloseApplication();
+        }
 
-            for (int i = 0; i < inputLanguages.Count; i++)
-            {
-                if (i != selectedIndexInOther)
-                {
-                    Language2Selector.Items.Add(inputLanguages[i].LayoutName);
-                }
-            }
+        private void openToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            // Show the main form when the user double-clicks the system tray icon
+            this.Visible = true;
+            this.Show();
+            this.WindowState = FormWindowState.Normal;
         }
     }
 }
