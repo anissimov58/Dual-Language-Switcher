@@ -262,6 +262,10 @@ namespace LDS
             //right pair
             activeKeys.Add(KeyboardHook.VKeys.RSHIFT);
             activeKeys.Add(KeyboardHook.VKeys.RMENU);
+
+
+            ToggleValue = (int)MyConstants.LANGTOGGLE_VALUES.ALT_SHIFT;
+
         }
 
         private static void SetUpToggleForCtrlShift()
@@ -277,6 +281,9 @@ namespace LDS
             //right pair
             activeKeys.Add(KeyboardHook.VKeys.RCONTROL);
             activeKeys.Add(KeyboardHook.VKeys.RSHIFT);
+
+            ToggleValue = (int)MyConstants.LANGTOGGLE_VALUES.CTRL_SHIFT;
+
         }
 
         private static void KeyboardHook_KeyUp(KeyboardHook.VKeys key)
@@ -448,6 +455,7 @@ namespace LDS
             if (radioButtonAltShift.Checked)
             {
                 SetUpToggleForAltShift();
+
             }
         }
 
