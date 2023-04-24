@@ -41,8 +41,14 @@
             buttonStartStop = new Button();
             panel1 = new Panel();
             checkBoxEnableStartup = new CheckBox();
+            radioButtonReturnCtrlShift = new RadioButton();
+            radioButtonReturnNone = new RadioButton();
+            label1 = new Label();
+            radioButtonReturnAltShift = new RadioButton();
+            panel2 = new Panel();
             contextMenuStrip1.SuspendLayout();
             panel1.SuspendLayout();
+            panel2.SuspendLayout();
             SuspendLayout();
             // 
             // notifyIcon1
@@ -105,6 +111,7 @@
             radioButtonCtrlShift.TabIndex = 3;
             radioButtonCtrlShift.Text = "Ctrl + Shift";
             radioButtonCtrlShift.UseVisualStyleBackColor = true;
+            radioButtonCtrlShift.CheckedChanged += radioButtonCtrlShift_CheckedChanged;
             // 
             // radioButtonAltShift
             // 
@@ -116,10 +123,11 @@
             radioButtonAltShift.TabIndex = 4;
             radioButtonAltShift.Text = "Alt + Shift";
             radioButtonAltShift.UseVisualStyleBackColor = true;
+            radioButtonAltShift.CheckedChanged += radioButtonAltShift_CheckedChanged;
             // 
             // buttonStartStop
             // 
-            buttonStartStop.Location = new Point(13, 175);
+            buttonStartStop.Location = new Point(13, 230);
             buttonStartStop.Margin = new Padding(4);
             buttonStartStop.Name = "buttonStartStop";
             buttonStartStop.Size = new Size(305, 38);
@@ -148,11 +156,68 @@
             checkBoxEnableStartup.UseVisualStyleBackColor = true;
             checkBoxEnableStartup.CheckedChanged += checkBoxEnableStartup_CheckedChanged;
             // 
+            // radioButtonReturnCtrlShift
+            // 
+            radioButtonReturnCtrlShift.AutoSize = true;
+            radioButtonReturnCtrlShift.Location = new Point(103, 3);
+            radioButtonReturnCtrlShift.Margin = new Padding(2);
+            radioButtonReturnCtrlShift.Name = "radioButtonReturnCtrlShift";
+            radioButtonReturnCtrlShift.Size = new Size(98, 24);
+            radioButtonReturnCtrlShift.TabIndex = 5;
+            radioButtonReturnCtrlShift.Text = "Ctrl + Shift";
+            radioButtonReturnCtrlShift.UseVisualStyleBackColor = true;
+            radioButtonReturnCtrlShift.CheckedChanged += radioButtonReturnCtrlShift_CheckedChanged;
+            // 
+            // radioButtonReturnNone
+            // 
+            radioButtonReturnNone.AutoSize = true;
+            radioButtonReturnNone.Location = new Point(210, 3);
+            radioButtonReturnNone.Margin = new Padding(2);
+            radioButtonReturnNone.Name = "radioButtonReturnNone";
+            radioButtonReturnNone.Size = new Size(63, 24);
+            radioButtonReturnNone.TabIndex = 10;
+            radioButtonReturnNone.Text = "None";
+            radioButtonReturnNone.UseVisualStyleBackColor = true;
+            radioButtonReturnNone.CheckedChanged += radioButtonReturnNone_CheckedChanged;
+            // 
+            // label1
+            // 
+            label1.Location = new Point(13, 171);
+            label1.Name = "label1";
+            label1.Size = new Size(305, 27);
+            label1.TabIndex = 11;
+            label1.Text = "When disabled, switch back to:";
+            label1.TextAlign = ContentAlignment.MiddleCenter;
+            // 
+            // radioButtonReturnAltShift
+            // 
+            radioButtonReturnAltShift.AutoSize = true;
+            radioButtonReturnAltShift.Location = new Point(7, 3);
+            radioButtonReturnAltShift.Margin = new Padding(2);
+            radioButtonReturnAltShift.Name = "radioButtonReturnAltShift";
+            radioButtonReturnAltShift.Size = new Size(94, 24);
+            radioButtonReturnAltShift.TabIndex = 5;
+            radioButtonReturnAltShift.Text = "Alt + Shift";
+            radioButtonReturnAltShift.UseVisualStyleBackColor = true;
+            radioButtonReturnAltShift.CheckedChanged += radioButtonReturnAltShift_CheckedChanged;
+            // 
+            // panel2
+            // 
+            panel2.Controls.Add(radioButtonReturnAltShift);
+            panel2.Controls.Add(radioButtonReturnCtrlShift);
+            panel2.Controls.Add(radioButtonReturnNone);
+            panel2.Location = new Point(13, 192);
+            panel2.Name = "panel2";
+            panel2.Size = new Size(305, 31);
+            panel2.TabIndex = 12;
+            // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(331, 225);
+            ClientSize = new Size(331, 281);
+            Controls.Add(panel2);
+            Controls.Add(label1);
             Controls.Add(checkBoxEnableStartup);
             Controls.Add(panel1);
             Controls.Add(buttonStartStop);
@@ -162,7 +227,7 @@
             Icon = (Icon)resources.GetObject("$this.Icon");
             Margin = new Padding(4);
             MaximizeBox = false;
-            MaximumSize = new Size(347, 264);
+            MaximumSize = new Size(347, 320);
             MinimumSize = new Size(347, 264);
             Name = "MainForm";
             RightToLeft = RightToLeft.No;
@@ -174,6 +239,8 @@
             contextMenuStrip1.ResumeLayout(false);
             panel1.ResumeLayout(false);
             panel1.PerformLayout();
+            panel2.ResumeLayout(false);
+            panel2.PerformLayout();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -191,5 +258,10 @@
         private ContextMenuStrip contextMenuStrip1;
         private ToolStripMenuItem openToolStripMenuItem;
         private ToolStripMenuItem exitToolStripMenuItem;
+        private RadioButton radioButtonReturnCtrlShift;
+        private RadioButton radioButtonReturnNone;
+        private Label label1;
+        private RadioButton radioButtonReturnAltShift;
+        private Panel panel2;
     }
 }

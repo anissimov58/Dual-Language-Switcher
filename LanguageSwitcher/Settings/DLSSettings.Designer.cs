@@ -70,5 +70,17 @@ namespace DLS.Settings {
                 this["IsStartupEnabled"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("-1")]
+        public int ReturnTo {
+            get {
+                return ((int)(this["ReturnTo"]));
+            }
+            set {
+                this["ReturnTo"] = value;
+            }
+        }
     }
 }

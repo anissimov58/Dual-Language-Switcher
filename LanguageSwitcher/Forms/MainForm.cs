@@ -28,7 +28,6 @@ namespace LDS
         //keys that are beeing listend to
         private static List<KeyboardHook.VKeys> activeKeys = new List<KeyboardHook.VKeys>();    //keys that are beeing listend to
         private static List<KeyboardHook.VKeys> pressedKeys = new List<KeyboardHook.VKeys>();   //keys that has been pressed, but not released
-
         private static List<InputLanguage> inputLanguages = new List<InputLanguage>();          //list of all the input Languages on this current machine
 
         private static int ToggleValue;             //value of Registry Key "HKEY_CURRENT_USER\Keyboard Layout\Toggle\Language Hotkey"
@@ -61,6 +60,35 @@ namespace LDS
             InitSwitchingMethodSelectors();
 
             InitEnablingOnStartup();
+
+            InitLayoutReturnToSelectors();
+        }
+
+        private void InitLayoutReturnToSelectors()
+        {
+            int returnToggle = RegistryHelper.Get_Language_Toggle_Value();
+            switch (returnToggle)
+            {
+                case (int)MyConstants.LANGTOGGLE_VALUES.ALT_SHIFT:
+                    radioButtonReturnAltShift.Checked = true;
+                    radioButtonReturnCtrlShift.Checked = false;
+                    radioButtonReturnNone.Checked = false;
+                    break;
+
+                case (int)MyConstants.LANGTOGGLE_VALUES.CTRL_SHIFT:
+                    radioButtonReturnAltShift.Checked = false;
+                    radioButtonReturnCtrlShift.Checked = true;
+                    radioButtonReturnNone.Checked = false;
+                    break;
+                default:
+                    radioButtonReturnAltShift.Checked = radioButtonAltShift.Checked;
+                    radioButtonReturnCtrlShift.Checked = radioButtonCtrlShift.Checked;
+                    radioButtonReturnNone.Checked = false;
+                    break;
+            }
+
+            //DLSSettings.Default.ReturnTo = returnToggle;
+            //DLSSettings.Default.Save();
         }
 
         private void InitEnablingOnStartup()
@@ -131,8 +159,8 @@ namespace LDS
             {
                 //App has been ran before, simply apply settings and hide window.
                 //  Hide the form from the taskbar
-                this.Visible = false;
-
+                //this.Visible = false;
+                this.WindowState = FormWindowState.Minimized;
 
                 //bounds checking and assigning values
                 //Second goes first, so that after checking - they will be in accending order
@@ -169,19 +197,14 @@ namespace LDS
             keyboardHook.KeyDown += new KeyboardHook.KeyboardHookCallback(KeyboardHook_KeyDown);
             keyboardHook.KeyUp += new KeyboardHook.KeyboardHookCallback(KeyboardHook_KeyUp);
 
-            //Populate activeKeys based of toggleValue
-            switch (ToggleValue)
+            //Populate activeKeys based of RadioButtonValue
+            switch (radioButtonAltShift.Checked)
             {
-                case (int)MyConstants.LANGTOGGLE_VALUES.CTRL_SHIFT:
+                case true:
+                    SetUpToggleForAltShift();
+                    break;
+                default:
                     SetUpToggleForCtrlShift();
-                    break;
-
-                case (int)MyConstants.LANGTOGGLE_VALUES.ALT_SHIFT:
-                    SetUpToggleForAltShift();
-                    break;
-                default: //if NONE or any other value
-                    //then set it to ALT+SHIFT because 95% users use Alt+Shift
-                    SetUpToggleForAltShift();
                     break;
             }
 
@@ -204,6 +227,14 @@ namespace LDS
             DLSSettings.Default.LanguageIndex2 = Language2Selector.SelectedIndex;
             DLSSettings.Default.Language_Toggle = ToggleValue;
             DLSSettings.Default.IsStartupEnabled = checkBoxEnableStartup.Checked;
+
+            //if (radioButtonReturnAltShift.Checked)
+            //    DLSSettings.Default.ReturnTo = (int)MyConstants.LANGTOGGLE_VALUES.ALT_SHIFT;
+            //else if (radioButtonReturnCtrlShift.Checked)
+            //    DLSSettings.Default.ReturnTo = (int)MyConstants.LANGTOGGLE_VALUES.ALT_SHIFT;
+            //else
+            //    DLSSettings.Default.ReturnTo = (int)MyConstants.LANGTOGGLE_VALUES.NONE;
+
             //Saving Settings
             DLSSettings.Default.Save();
         }
@@ -211,7 +242,7 @@ namespace LDS
         private void RemoveKeyboardHook()
         {
             //We heed to restore build-in keyboard toggle
-            RegistryHelper.Set_Language_Toggle_Value(ToggleValue);
+            RegistryHelper.Set_Language_Toggle_Value(DLSSettings.Default.ReturnTo);
 
             //now lets uninstall our hook
             keyboardHook.Uninstall();
@@ -265,6 +296,7 @@ namespace LDS
                 {
 
                     IntPtr hkl = GetKeyboardLayout(0x00000000);
+
 
                     //Console.WriteLine("[" + DateTime.Now.ToLongTimeString() + "]Prepearing to change layout. Current handle is:" + hkl);
                     //0x04190419 Русская
@@ -348,12 +380,14 @@ namespace LDS
             {
                 InitKeyboardHook();
                 buttonStartStop.Text = "Enabled. Running.";
+                buttonStartStop.BackColor = Color.Green;
                 IsRunning = true;
             }
             else
             {
                 RemoveKeyboardHook();
                 buttonStartStop.Text = "Stopped. Press to start.";
+                buttonStartStop.BackColor = SystemColors.Control;
                 IsRunning = false;
             }
 
@@ -386,7 +420,7 @@ namespace LDS
             this.Visible = true;
             this.Show();
             this.Focus();
-            //this.WindowState = FormWindowState.Normal;
+            this.WindowState = FormWindowState.Normal;
         }
 
         private void checkBoxEnableStartup_CheckedChanged(object sender, EventArgs e)
@@ -404,9 +438,52 @@ namespace LDS
         private void MainForm_Load(object sender, EventArgs e)
         {
             Screen screen = Screen.PrimaryScreen;
-            int x = screen.WorkingArea.Width - this.Width - 0;
-            int y = screen.WorkingArea.Height - this.Height - 0;
+            int x = screen.WorkingArea.Width - this.MaximumSize.Width - 0;
+            int y = screen.WorkingArea.Height - this.MaximumSize.Height - 0;
             this.Location = new Point(x, y);
+        }
+
+        private void radioButtonAltShift_CheckedChanged(object sender, EventArgs e)
+        {
+            if (radioButtonAltShift.Checked)
+            {
+                SetUpToggleForAltShift();
+            }
+        }
+
+        private void radioButtonCtrlShift_CheckedChanged(object sender, EventArgs e)
+        {
+            if (radioButtonCtrlShift.Checked)
+            {
+                SetUpToggleForCtrlShift();
+            }
+        }
+
+        private void radioButtonReturnAltShift_CheckedChanged(object sender, EventArgs e)
+        {
+            if (radioButtonReturnAltShift.Checked)
+            {
+                DLSSettings.Default.ReturnTo = (int)MyConstants.LANGTOGGLE_VALUES.ALT_SHIFT;
+                DLSSettings.Default.Save();
+            }
+        }
+
+        private void radioButtonReturnCtrlShift_CheckedChanged(object sender, EventArgs e)
+        {
+            if (radioButtonReturnCtrlShift.Checked)
+            {
+                DLSSettings.Default.ReturnTo = (int)MyConstants.LANGTOGGLE_VALUES.CTRL_SHIFT;
+                DLSSettings.Default.Save();
+            }
+        }
+
+        private void radioButtonReturnNone_CheckedChanged(object sender, EventArgs e)
+        {
+            if (radioButtonReturnNone.Checked)
+            {
+                DLSSettings.Default.ReturnTo = (int)MyConstants.LANGTOGGLE_VALUES.NONE;
+                DLSSettings.Default.Save();
+            }
         }
     }
 }

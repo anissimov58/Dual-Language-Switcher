@@ -1,5 +1,5 @@
 ﻿<?xml version='1.0' encoding='utf-8'?>
-<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="LanguageSwitcher.Settings" GeneratedClassName="MySettings">
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="DLS.Settings" GeneratedClassName="DLSSettings">
   <Profiles />
   <Settings>
     <Setting Name="Language_Toggle" Type="System.Int32" Scope="User">
@@ -13,6 +13,9 @@
     </Setting>
     <Setting Name="IsStartupEnabled" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="ReturnTo" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">-1</Value>
     </Setting>
   </Settings>
 </SettingsFile>
